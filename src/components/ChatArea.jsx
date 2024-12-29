@@ -26,7 +26,7 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
   const [newMessage, setNewMessage] = useState("");
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [typingUsers, setTypingUsers] = useState(new Set()); //collection of uniques values - set
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const toast = useToast();
@@ -38,7 +38,7 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
       //fetch messages
       fetchMessages();
       socket.emit("join room", selectedGroup?._id);
-      socket.on("message receive", (newMessage) => {
+      socket.on("Message Received", (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
       });
 
@@ -59,7 +59,7 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
       socket.on("notification", (notification) => {
         toast({
           title:
-            notification?.type === "USER_JOINED" ? "New User" : "Notification",
+            notification?.type === "USER_JOIN" ? "New User" : "Notification",
           description: notification.message,
           status: "info",
           duration: 3000,
@@ -68,11 +68,11 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
         });
       });
 
-      socket.on("user typing", ({ username }) => {
+      socket.on("typing", ({ username }) => {
         setTypingUsers((prev) => new Set(prev).add(username));
       });
 
-      socket.on("user stop typing", ({ username }) => {
+      socket.on("stop typing", ({ username }) => {
         setTypingUsers((prev) => {
           const newSet = new Set(prev);
           newSet.delete(username);
@@ -82,13 +82,13 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
       //clean up
       return () => {
         socket.emit("leave room", selectedGroup?._id);
-        socket.off("message received");
+        socket.off("Message Received");
         socket.off("users in room");
         socket.off("user joined");
         socket.off("user left");
         socket.off("notification");
-        socket.off("user typing");
-        socket.off("user stop typing");
+        socket.off("typing");
+        socket.off("stop typing");
       };
     }
   }, [selectedGroup, socket, toast]);
