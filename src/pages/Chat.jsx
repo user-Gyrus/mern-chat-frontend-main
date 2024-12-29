@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import ChatArea from "../components/ChatArea";
 import io from "socket.io-client";
 import { useEffect, useState } from "react";
+import GroupChat from "../components/GroupChat";
 import apiURL from "../../utils";
 
 const ENDPOINT = apiURL;
@@ -12,7 +13,7 @@ const Chat = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || {});
+    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const newSocket = io(ENDPOINT, {
       auth: { user: userInfo },
     });
@@ -23,6 +24,7 @@ const Chat = () => {
       }
     };
   }, []);
+
   return (
     <Flex h="100vh" direction={{ base: "column", md: "row" }}>
       <Box
@@ -38,12 +40,20 @@ const Chat = () => {
         flex="1"
         display={{ base: selectedGroup ? "block" : "none", md: "block" }}
       >
-        {socket && (
-          <ChatArea
+        {selectedGroup ? (
+          <GroupChat
             selectedGroup={selectedGroup}
             socket={socket}
             setSelectedGroup={setSelectedGroup}
           />
+        ) : (
+          socket && (
+            <ChatArea
+              selectedGroup={selectedGroup}
+              socket={socket}
+              setSelectedGroup={setSelectedGroup}
+            />
+          )
         )}
       </Box>
     </Flex>

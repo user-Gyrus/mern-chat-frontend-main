@@ -114,6 +114,7 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
     if (!newMessage.trim()) {
       return;
     }
+
     try {
       const token = currentUser.token;
       const { data } = await axios.post(
@@ -126,13 +127,16 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      socket.emit("new message", {
+
+      // Emit the 'send message' event instead of 'new message'
+      socket.emit("send message", {
         ...data,
         groupId: selectedGroup?._id,
       });
 
+      // Optionally, update local messages UI
       setMessages([...messages, data]);
-      setNewMessage("");
+      setNewMessage(""); // Clear the input field after sending the message
     } catch (error) {
       toast({
         title: "Error sending message",
@@ -142,6 +146,7 @@ const ChatArea = ({ selectedGroup, socket, setSelectedGroup }) => {
       });
     }
   };
+
   //handleTyping
   const handleTyping = (e) => {
     setNewMessage(e.target.value);
